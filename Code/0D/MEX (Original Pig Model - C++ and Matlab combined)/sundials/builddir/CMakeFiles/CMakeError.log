@@ -1,0 +1,31 @@
+Determining if the _POSIX_TIMERS exist failed with the following output:
+Change Dir: /Users/satolab/Desktop/ShannonPigModel/Cpp_files/sundials/builddir/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_96566/fast && /Library/Developer/CommandLineTools/usr/bin/make -f CMakeFiles/cmTC_96566.dir/build.make CMakeFiles/cmTC_96566.dir/build
+Building C object CMakeFiles/cmTC_96566.dir/CheckSymbolExists.c.o
+/Library/Developer/CommandLineTools/usr/bin/cc   -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk   -o CMakeFiles/cmTC_96566.dir/CheckSymbolExists.c.o   -c /Users/satolab/Desktop/ShannonPigModel/Cpp_files/sundials/builddir/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Linking C executable cmTC_96566
+/usr/local/Cellar/cmake/3.15.5/bin/cmake -E cmake_link_script CMakeFiles/cmTC_96566.dir/link.txt --verbose=1
+/Library/Developer/CommandLineTools/usr/bin/cc   -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_96566.dir/CheckSymbolExists.c.o  -o cmTC_96566 -lrt 
+ld: library not found for -lrt
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make[1]: *** [cmTC_96566] Error 1
+make: *** [cmTC_96566/fast] Error 2
+
+
+File /Users/satolab/Desktop/ShannonPigModel/Cpp_files/sundials/builddir/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <unistd.h>
+#include <time.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef _POSIX_TIMERS
+  return ((int*)(&_POSIX_TIMERS))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
