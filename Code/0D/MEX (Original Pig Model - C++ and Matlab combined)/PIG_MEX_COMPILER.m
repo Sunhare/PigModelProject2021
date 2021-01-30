@@ -14,7 +14,7 @@ output_last_two = 1; % 0 = all APs, 1 = Only keep last two in output file
 hegyi_ion_data = 1;  % Ion concentrations. 0 = Original Shannon , 1 = Hegyi experimental data
 s2_pcl = -1;         % S1S2 pacing protocol, S2 duration (-1 = no S1S2)
 
-OPTIMIZATION_SWITCH = 1;
+OPTIMIZATION_SWITCH = 0;
 % Constant parameters
 const_params = [
     pcl              % 1

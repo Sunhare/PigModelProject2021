@@ -1,6 +1,6 @@
 %% Pacing Frequency Run
 
-cell_type = 1;
+cell_type = 1; %0 = Control, 1 = Remote-HF, 2 = Border-HF
 
 pcl_array = [200, 250, 333.3, 500, 1000, 2000, 5000];
 exp_apd_C = [125.2, 142.5, 165.9, 201.5, 244.2, 282.3, 307.46]; %Expected mean experimental APDs
@@ -43,7 +43,7 @@ toc
 %% Plot Pacing Frequency
 % openfig('exp_rate_dependency.fig');
 % openfig('exp_rate_dependency_remote.fig');
-hold on
+% hold on
 set(gcf, 'Color', 'white')
 f = 1./(pcl_array./1000); % frequencies
 plot(f, apd_2nd_last, 'Xm',  'MarkerSize', 60, 'LineWidth', 5)
@@ -218,3 +218,8 @@ legend("APD: n-1", "APD: n", 'position', [0.5, 0.5 0.2 0.2],'FontSize', 50)
 set(gca,'linewidth',10, 'fontweight', 'bold')
 legend boxoff
 set(gca,'TickDir','out')
+
+function cap_str = capitalize(in_str)
+    cap_str = regexprep(in_str,'(\<[a-z])','${upper($1)}');
+
+end

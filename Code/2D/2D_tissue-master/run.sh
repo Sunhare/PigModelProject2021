@@ -1,0 +1,1 @@
+./Atria_2D_MPI_Ghost Total_time 1000
