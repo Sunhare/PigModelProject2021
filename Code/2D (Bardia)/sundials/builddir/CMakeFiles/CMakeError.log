@@ -1,0 +1,30 @@
+Determining if the _POSIX_TIMERS exist failed with the following output:
+Change Dir: /Users/satolab/Desktop/ShannonPigModel/draft_pig_model_code/sundials/builddir/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_03f2e/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make  -f CMakeFiles/cmTC_03f2e.dir/build.make CMakeFiles/cmTC_03f2e.dir/build
+Building C object CMakeFiles/cmTC_03f2e.dir/CheckSymbolExists.c.o
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc   -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -o CMakeFiles/cmTC_03f2e.dir/CheckSymbolExists.c.o -c /Users/satolab/Desktop/ShannonPigModel/draft_pig_model_code/sundials/builddir/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Linking C executable cmTC_03f2e
+/usr/local/Cellar/cmake/3.18.4/bin/cmake -E cmake_link_script CMakeFiles/cmTC_03f2e.dir/link.txt --verbose=1
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc  -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/cmTC_03f2e.dir/CheckSymbolExists.c.o -o cmTC_03f2e  -lrt 
+ld: library not found for -lrt
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make[1]: *** [cmTC_03f2e] Error 1
+make: *** [cmTC_03f2e/fast] Error 2
+
+
+File /Users/satolab/Desktop/ShannonPigModel/draft_pig_model_code/sundials/builddir/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <unistd.h>
+#include <time.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef _POSIX_TIMERS
+  return ((int*)(&_POSIX_TIMERS))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
