@@ -60,14 +60,14 @@ scaling_parameters = [
 for CT=1:3
     n_const = length(const_params);
     if CT == 1
-%         load("./outputs/OptimizedParameters/PARAMETER_STORE_control_JULY7.mat")
-        load("./outputs/OptimizedParameters/PARAMETER_STORE_control_Jan292021.mat")
+        load("./outputs/OptimizedParameters/PARAMETER_STORE_control_JULY7.mat")
+%         load("./outputs/OptimizedParameters/PARAMETER_STORE_control_Jan292021.mat")
 
         scaling_params = PARAMETER_STORE(n_const+1:end,end);
         all_params = [const_params; scaling_params];
-%         all_params(n_const+ 4) = 0.5;    %I_K1 scaling;
-%         all_params(n_const+ 10) = 1.2; %I_NaK
-%         all_params(n_const+ 14) = 5; %KoCa
+        all_params(n_const+ 4) = 0.5;    %I_K1 scaling;
+        all_params(n_const+ 10) = 1.2; %I_NaK
+        all_params(n_const+ 14) = 5; %KoCa
         control_params = all_params;
     end
 

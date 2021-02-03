@@ -78,6 +78,7 @@ for tn=0:tnmax
     v(sizex,:)=v(sizex-2,:);
     v(:,1)=v(:,3);
     v(:,sizey)=v(:,sizey-2);
+    
     for cx=2:sizex-1
         for cy=2:sizey-1
             vnew(cx,cy)=v(cx,cy)+(v(cx-1,cy)+v(cx+1,cy)+v(cx,cy+1)+v(cx,cy-1)-4*v(cx,cy))*dfu*dt/(dx*dx)/2;
