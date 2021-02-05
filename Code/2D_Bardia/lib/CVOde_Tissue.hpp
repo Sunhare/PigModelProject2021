@@ -15,10 +15,11 @@ public:
 
 	double *tmp;
 
-	const double dfu=0.0005;
+	// const double dfu=0.0005;
+	const double dfu=0.0001;
     const double dx=0.015;//0.15 mm
 
-	const double dt_max; 
+	const double dt; 
 	CVOde_Cell **tissue = new CVOde_Cell* [NN];
 
 	std::ofstream output_file;// output filename
@@ -39,7 +40,7 @@ public:
 		, NY(NY)
 		, NN(NX*NY)
 		, NEQ(NEQ)
-		, dt_max(t_step_max)
+		, dt(t_step_max)
 
 	{
 		init_tissue();
@@ -71,40 +72,57 @@ public:
 	void init_tissue(void);
 	void print_tissue(int tn);
 	void ekmodel_diffusion(double t);
+	void create_stim_map(std::string STIM_TYPE, int NUM_STIM);
 
 };
 
-// void CVOde_TISSUE::ekmodel_diffusion(double t){
-	
-//     //non-flux boundary
-//     for (int i=0;i<NX;i++) {
-//       tissue[i*NY+0]->cell.V=tissue[i*NY+2]->cell.V;
-//       tissue[i*NY+NY-1]->cell.V=tissue[i*NY+NY-3]->cell.V;
-//     }
-//     for (int j=0;j<NY;j++) {
-//       tissue[0*NY+j]->cell.V=tissue[2*NY+j]->cell.V;
-//       tissue[(NX-1)*NY+j]->cell.V=tissue[(NX-3)*NY+j]->cell.V;
-//     }
-//     for (int i=1;i<NX-1;i++) {
-//       for (int j=1;j<NY-1;j++) {
-//         tmp[i*NY+j]->cell.V=tissue[i*NY+j]->cell.V+(tissue[(i-1)*NY+j]->cell.V+tissue[(i+1)*NY+j]->cell.V+tissue[i*NY+(j-1)]->cell.V+tissue[i*NY+(j+1)]->cell.V-4*tissue[i*NY+j]->cell.V)*dfu*dt/(dx*dx)/2;
-//       }
-//     }
+void CVOde_TISSUE::create_stim_map(std::string STIM_TYPE, int NUM_STIM){
 
-//     for (int i=0;i<NX;i++) {
-//       tmp[i*NY+0]->cell.V=tmp[i*NY+2]->cell.V;
-//       tmp[i*NY+NY-1]->cell.V=tmp[i*NY+NY-3]->cell.V;
-//     }
-//     for (int j=0;j<NY;j++) {
-//       tmp[0*NY+j]->cell.V=tmp[2*NY+j]->cell.V;
-//       tmp[(NX-1)*NY+j]->cell.V=tmp[(NX-3)*NY+j]->cell.V;
-//     }
-//     for (int i=1;i<NX-1;i++) {
-//       for (int j=1;j<NY-1;j++) {
-//         tissue[i*NY+j]->cell.V=tmp[i*NY+j]->cell.V+(tmp[(i-1)*NY+j]->cell.V+tmp[(i+1)*NY+j]->cell.V+tmp[i*NY+(j-1)]->cell.V+tmp[i*NY+(j+1)]->cell.V-4*tmp[i*NY+j]->cell.V)*dfu*dt/(dx*dx)/2;
-//       }
-//     }
-// }
+	if(STIM_TYPE == "LEFT"){
+		for(int id=0; id<NN; id++){
+			if((id*NX+id)%NX < NUM_STIM ){
+				tissue[id]->cell.allow_stimulation_flag = true;
+			}
+			else{
+				tissue[id]->cell.allow_stimulation_flag = false;
+			}		
+		}
+	}
+	
+}
+
+
+void CVOde_TISSUE::ekmodel_diffusion(double t){
+	
+    //non-flux boundary
+    for (int i=0;i<NY;i++) {
+      tissue[i*NX+0]->cell.V=tissue[i*NX+2]->cell.V;
+      tissue[i*NX+NX-1]->cell.V=tissue[i*NX+NX-3]->cell.V;
+    }
+    for (int j=0;j<NX;j++) {
+      tissue[0*NX+j]->cell.V=tissue[2*NX+j]->cell.V;
+      tissue[(NY-1)*NX+j]->cell.V=tissue[(NY-3)*NX+j]->cell.V;
+    }
+    for (int i=1;i<NY-1;i++) {
+      for (int j=1;j<NX-1;j++) {
+        tmp[i*NX+j]=tissue[i*NX+j]->cell.V+(tissue[(i-1)*NX+j]->cell.V+tissue[(i+1)*NX+j]->cell.V+tissue[i*NX+(j-1)]->cell.V+tissue[i*NX+(j+1)]->cell.V-4*tissue[i*NX+j]->cell.V)*dfu*dt/(dx*dx)/2;
+      }
+    }
+
+    for (int i=0;i<NY;i++) {
+      tmp[i*NX+0]=tmp[i*NX+2];
+      tmp[i*NX+NX-1]=tmp[i*NX+NX-3];
+    }
+    for (int j=0;j<NX;j++) {
+      tmp[0*NX+j]=tmp[2*NX+j];
+      tmp[(NY-1)*NX+j]=tmp[(NY-3)*NX+j];
+    }
+    for (int i=1;i<NY-1;i++) {
+      for (int j=1;j<NX-1;j++) {
+        tissue[i*NX+j]->cell.V=tmp[i*NX+j]+(tmp[(i-1)*NX+j]+tmp[(i+1)*NX+j]+tmp[i*NX+(j-1)]+tmp[i*NX+(j+1)]-4*tmp[i*NX+j])*dfu*dt/(dx*dx)/2;
+      }
+    }
+}
 
 void CVOde_TISSUE::init_tissue(){
 	for (int id=0; id<NN; id++){
