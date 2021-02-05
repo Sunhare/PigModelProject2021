@@ -39,7 +39,7 @@ public:
 		double t_step_max, 
 		cvode_func ode_function,
        	bool output_data = false, 
-       	int PIG_CELL_TYPE = CONTROL
+       	int PIG_CELL_TYPE = CONTROL //Default value
        	)
 		: NX(NX)
 		, NY(NY)
@@ -48,7 +48,7 @@ public:
 		, dt(t_step_max)
 
 	{
-		init_tissue();
+		init_tissue(PIG_CELL_TYPE);
 		tmp = new double [NN];
 
 		switch(PIG_CELL_TYPE){
@@ -74,9 +74,10 @@ public:
 	}
 
 
-	void init_tissue(void);
+	void init_tissue(int PIG_CELL_TYPE);
 	void print_tissue(int tn);
 	void ekmodel_diffusion(double t);
+	void ectopic_beat(std::string ECT_BEAT_TYPE);
 	void create_stim_map(std::string STIM_TYPE, int NUM_STIM);
 
 };
@@ -85,7 +86,7 @@ void CVOde_TISSUE::create_stim_map(std::string STIM_TYPE, int NUM_STIM){
 
 	if(STIM_TYPE == "LEFT"){
 		for(int id=0; id<NN; id++){
-			if((id*NX+id)%NX < NUM_STIM ){
+			if(id%NX < NUM_STIM ){
 				tissue[id]->cell.allow_stimulation_flag = true;
 			}
 			else{
@@ -135,10 +136,29 @@ void CVOde_TISSUE::ekmodel_diffusion(double t){
     }
 }
 
-void CVOde_TISSUE::init_tissue(){
-	for (int id=0; id<NN; id++){
-		tissue[id] = new CVOde_Cell(NEQ, 0.2, fnew_pig_vm_as_para, false, CONTROL);
+void CVOde_TISSUE::ectopic_beat(std::string ECT_BEAT_TYPE){
+	if(ECT_BEAT_TYPE == "TOP"){
+
+		for(int idx=0; idx<NX; idx++){
+			for(int idy=0; idy<NY; idy++){
+				if(idx > NX/2){
+					tissue[idx*NX+idy]->cell.V = 30;
+				}
+			}
+		}
+		// for(int id=0; id<NN; id++){
+		// 	if(id < NN/2 ){
+		// 		tissue[id]->cell.V = 30;
+		// 	}	
+		// }
 	}
+}
+
+void CVOde_TISSUE::init_tissue(int PIG_CELL_TYPE){
+	for (int id=0; id<NN; id++){
+		tissue[id] = new CVOde_Cell(NEQ, 0.2, fnew_pig_vm_as_para, false, PIG_CELL_TYPE);
+	}
+	
 }
 
 void CVOde_TISSUE::print_tissue(int tn){
