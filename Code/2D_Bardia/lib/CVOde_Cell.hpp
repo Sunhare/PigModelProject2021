@@ -47,6 +47,11 @@ public:
 		cvode.set_user_data(&cell);
 	}
 
+	void solve_single_time_step(double tout) {
+		// CVode(cvode_mem, tout, y, &t, CV_NORMAL); // 1 time step solution.
+		cvode.solve_single_step(tout);
+	}
+
 	void solve_single_time_step_vm_para(double tout, double dt) {
 		// CVode(cvode_mem, tout, y, &t, CV_NORMAL); // 1 time step solution.
 		cvode.solve_single_step(tout);

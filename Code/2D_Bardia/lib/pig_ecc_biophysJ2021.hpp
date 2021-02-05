@@ -25,9 +25,6 @@ public:
 		{
 			ydot[0] = 0.0;
 		}
-		// for (int i = 0; i < 14; ++i) {
-		// 	para[i] = 1.0;
-		// }
 
 		switch(cell_type){
 			case CONTROL:
@@ -128,6 +125,9 @@ public:
 
 	double PCL = 1000.0;
 
+	void set_pcl(double newPCL){PCL=newPCL;}
+	double get_pcl(void){return PCL;}
+
 	bool allow_stimulation_flag = true;
 
 	static const int ODE_NUM = 73; //UPDATE To Soltis Saucerman ODE numbers
@@ -137,13 +137,52 @@ public:
 	double ydot[ODE_NUM];
 
 	// void print_to_file(double t, std::ofstream & output_file) ;
-	// void print_to_file_Vm_only(double t, std::ofstream & output_file) ;
+	void print_to_file_Vm_only(double t, std::ofstream & output_file);
 
 	void pig_ecc_biophysJ2021(double t); //ODE function
 	void read_initial_condition(const char * filename);
 
 
 };
+
+
+
+void PIG_ECC::read_initial_condition(const char* filename) {
+
+	std::ifstream ic_file(filename);
+
+	if (!ic_file) {
+		std::cerr << filename << " not opened!!! " << std::endl;
+		std::exit(0);
+	}
+	// std::cout << filename << " opened" << std::endl;
+
+	double tmp;
+	int counter = 0;
+	while(!ic_file.eof())
+	{
+		ic_file >> tmp;
+		y[counter] = tmp;
+
+		// std::cout << "y[" << counter << "]: " << tmp << std::endl;
+
+
+		counter++;
+
+	}
+
+	ic_file.close();
+
+}
+
+void PIG_ECC::print_to_file_Vm_only(double t, std::ofstream & output_file) {
+
+	output_file <<  std::setprecision(7)
+	            << t << "\t"  // 1
+	            << V << "\t"  // 2
+	            << std::endl;
+}
+
 
 
 // int pig_ecc_biophysJ2021(realtype t, N_Vector Y, N_Vector YDOT, void *user_data) {
@@ -1035,32 +1074,6 @@ void PIG_ECC::pig_ecc_biophysJ2021(double t){
 }
 
 
-void PIG_ECC::read_initial_condition(const char* filename) {
-
-	FILE *fp = fopen( filename, "r");
-
-	if (!fp) {
-		std::cerr << filename << " not opened!!! " << std::endl;
-		std::exit(0);
-	}
-
-	long int rw = fread(y, sizeof(double), ODE_NUM, fp);
-	if (rw != ODE_NUM) {
-		std::cerr << rw << " / " << ODE_NUM << " doubles read from " << filename << ", exiting..." << std::endl;
-		// exit(EXIT_FAILURE);
-		std::exit(0);
-	}
-
-	double tmp;
-	for ( int idy = 0; idy < ODE_NUM; idy++ ) { //Scan in variables from text file
-
-		fscanf ( fp, "%lf", &tmp );
-		y[idy] = tmp;
-		// Ith(y, idy+1) = tmp;
-
-	}
-	fclose( fp );
-}
 
 
 int fnew_pig(realtype t, N_Vector y, N_Vector ydot, void *user_data) {

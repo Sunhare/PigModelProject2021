@@ -9,5 +9,8 @@ CXXFLAGS = -O3 -std=c++11 -fopenmp
 pig_main: pig_main.cpp $(objs)  
 	$(CXX) $(CXXFLAGS) $(INC_PARAMS) $^ -o $@ $(LDFLAGS)
 
+2D_pig_main: 2D_pig_main.cpp $(objs)  
+	$(CXX) $(CXXFLAGS) $(INC_PARAMS) $^ -o $@ $(LDFLAGS)
+
 clean:
-	rm lib/*.o pig_main
+	rm lib/*.o pig_main 2D_pig_main

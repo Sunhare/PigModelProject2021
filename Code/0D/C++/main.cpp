@@ -62,7 +62,7 @@ int main(){
 	//Constant Simulation Parameters
 	double pcl = 1000.0; //double, pacing frequency of heart cell (milliseconds)
 	double AP_Clamp_Simulation = 0; //bool, 0 = No AP Clamp, 1 = AP Clamp
-	double nbeats = 200; //int, total number of heart beats to simulate
+	double nbeats = 10; //int, total number of heart beats to simulate
 	double dt = 0.1; //double, true time step
 	double output_dt = 1.0; //double, reduces file size by outputting less time steps
 	double output_last_two = 1; //bool, only output last two beats to reduce file size, 0 = false, 1 = true
