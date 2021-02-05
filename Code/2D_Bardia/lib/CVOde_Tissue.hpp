@@ -3,6 +3,11 @@
 
 #include "CVOde_Cell.hpp"
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
+
 typedef int  (*cvode_func) (realtype t, N_Vector y, N_Vector ydot, void *user_data);
 
 class CVOde_TISSUE
@@ -15,9 +20,9 @@ public:
 
 	double *tmp;
 
-	// const double dfu=0.0005;
 	const double dfu=0.0001;
-    const double dx=0.015;//0.15 mm
+	// const double dfu=0.0001;
+    const double dx=0.05;//0.15 mm
 
 	const double dt; 
 	CVOde_Cell **tissue = new CVOde_Cell* [NN];
@@ -95,29 +100,35 @@ void CVOde_TISSUE::create_stim_map(std::string STIM_TYPE, int NUM_STIM){
 void CVOde_TISSUE::ekmodel_diffusion(double t){
 	
     //non-flux boundary
+    #pragma omp parallel for
     for (int i=0;i<NY;i++) {
       tissue[i*NX+0]->cell.V=tissue[i*NX+2]->cell.V;
       tissue[i*NX+NX-1]->cell.V=tissue[i*NX+NX-3]->cell.V;
     }
+    #pragma omp parallel for
     for (int j=0;j<NX;j++) {
       tissue[0*NX+j]->cell.V=tissue[2*NX+j]->cell.V;
       tissue[(NY-1)*NX+j]->cell.V=tissue[(NY-3)*NX+j]->cell.V;
     }
+    #pragma omp parallel for
     for (int i=1;i<NY-1;i++) {
       for (int j=1;j<NX-1;j++) {
         tmp[i*NX+j]=tissue[i*NX+j]->cell.V+(tissue[(i-1)*NX+j]->cell.V+tissue[(i+1)*NX+j]->cell.V+tissue[i*NX+(j-1)]->cell.V+tissue[i*NX+(j+1)]->cell.V-4*tissue[i*NX+j]->cell.V)*dfu*dt/(dx*dx)/2;
       }
     }
-
+    #pragma omp parallel for
     for (int i=0;i<NY;i++) {
       tmp[i*NX+0]=tmp[i*NX+2];
       tmp[i*NX+NX-1]=tmp[i*NX+NX-3];
     }
+    #pragma omp parallel for
     for (int j=0;j<NX;j++) {
       tmp[0*NX+j]=tmp[2*NX+j];
       tmp[(NY-1)*NX+j]=tmp[(NY-3)*NX+j];
     }
+
     for (int i=1;i<NY-1;i++) {
+	  #pragma omp parallel for
       for (int j=1;j<NX-1;j++) {
         tissue[i*NX+j]->cell.V=tmp[i*NX+j]+(tmp[(i-1)*NX+j]+tmp[(i+1)*NX+j]+tmp[i*NX+(j-1)]+tmp[i*NX+(j+1)]-4*tmp[i*NX+j])*dfu*dt/(dx*dx)/2;
       }

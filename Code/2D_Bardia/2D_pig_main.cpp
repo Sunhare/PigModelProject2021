@@ -28,7 +28,7 @@ int main(){
 	//Macros for cell type: CONTROL=1, REMOTE_HF=2, BORDER_HF=3
 
 	// CVOde_Cell **ptissue = new CVOde_Cell* [NN];
-	CVOde_TISSUE ptissue(NX, NY, NEQ, 0.2, fnew_pig_vm_as_para, true, CONTROL);
+	CVOde_TISSUE ptissue(NX, NY, NEQ, 0.2, fnew_pig_vm_as_para, true, BORDER_HF);
 
 	ptissue.create_stim_map("LEFT", 3);	//(STIM_TYPE, NUM_CELLS_TO_STIM)
 	
@@ -48,6 +48,9 @@ int main(){
 	omp_set_num_threads(8);
 	//Main Loop
 	for (double t = 0; t <= t_total; t += dt) {
+		if(tn%out_dt == 0){
+			std::cout << "t = " << tn*dt << " ms" <<  std::endl;	
+		}
 
 		#pragma omp parallel for
 		for(int id=0; id<NN; id++){
@@ -55,31 +58,19 @@ int main(){
 
 		}
 
-		if(tn%out_dt == 0){
-			std::cout << "t = " << tn*dt << " ms" <<  std::endl;	
-		}
 		
-
 		
 		ptissue.ekmodel_diffusion(t);
 
 		if(tn%out_dt == 0){
 			ptissue.print_tissue(tn);	
 		}
-		
-		// v_new = ptissue.cell.V;
-
-		// if (v_new != v_new) {
-		// 	std::cerr << " NaNs Encountered, Exiting Programe... ... \n\n\n";
-		// 	std::exit(0);
-		// }
 
 		tn++;
 	}
 
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
-	// double elapsed = double(end - begin) / CLOCKS_PER_SEC;
 
 	std::cout << "Computation Time = " <<  (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 << " seconds	" <<std::endl;
 
