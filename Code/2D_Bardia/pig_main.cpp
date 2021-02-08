@@ -32,6 +32,7 @@ int main(){
 
 	ptissue.create_stim_map("LEFT", 3);	//(STIM_TYPE, NUM_CELLS_TO_STIM)
 	
+<<<<<<< HEAD
 	
 	double dt = 0.1;  // Max time step and diffusion time step
 	int out_dt = 100; // How often to write out results 
@@ -43,6 +44,12 @@ int main(){
 	//Control
 	tectopic = 440;
 	//Remote_HF
+=======
+	double dt = 0.1; 
+	int out_dt = 10; 
+	double t_total = 10000;
+	int tn = 0; //integer t, counts all iterations
+>>>>>>> parent of 9dd1908... Quick stash
 
 	//Border_HF
 	// tectopic = 740;

@@ -20,9 +20,9 @@ public:
 
 	double *tmp;
 
-	
-	const double dfu=0.0005;
-	const double dx=0.015;//0.15 mm
+	const double dfu=0.0001;
+	// const double dfu=0.0001;
+    const double dx=0.05;//0.15 mm
 
 	const double dt; 
 	CVOde_Cell **tissue = new CVOde_Cell* [NN];
@@ -77,7 +77,11 @@ public:
 	void init_tissue(void);
 	void print_tissue(int tn);
 <<<<<<< HEAD
+<<<<<<< HEAD
 	void ekmodel_diffusion(void);
+=======
+	void ekmodel_diffusion(double t);
+>>>>>>> parent of 9dd1908... Quick stash
 	void ectopic_beat(std::string ECT_BEAT_TYPE);
 =======
 	void ekmodel_diffusion(double t);
@@ -102,7 +106,7 @@ void CVOde_TISSUE::create_stim_map(std::string STIM_TYPE, int NUM_STIM){
 }
 
 
-void CVOde_TISSUE::ekmodel_diffusion(void){
+void CVOde_TISSUE::ekmodel_diffusion(double t){
 	
     //non-flux boundary
     #pragma omp parallel for
@@ -132,8 +136,8 @@ void CVOde_TISSUE::ekmodel_diffusion(void){
       tmp[(NY-1)*NX+j]=tmp[(NY-3)*NX+j];
     }
 
-    #pragma omp parallel for
     for (int i=1;i<NY-1;i++) {
+	  #pragma omp parallel for
       for (int j=1;j<NX-1;j++) {
         tissue[i*NX+j]->cell.V=tmp[i*NX+j]+(tmp[(i-1)*NX+j]+tmp[(i+1)*NX+j]+tmp[i*NX+(j-1)]+tmp[i*NX+(j+1)]-4*tmp[i*NX+j])*dfu*dt/(dx*dx)/2;
       }

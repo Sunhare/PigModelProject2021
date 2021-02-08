@@ -4,7 +4,7 @@ INC_PARAMS=-Ilib -Ilib_tissue -I/usr/local/include
 LIB    =-L/usr/local/lib
 
 LDFLAGS= -lsundials_cvode ${LIB}
-CXXFLAGS = -O3 -std=c++11 -fopenmp 
+CXXFLAGS = -O3 -std=c++11 -fopenmp
 
 pig_main: pig_main.cpp $(objs)  
 	$(CXX) $(CXXFLAGS) $(INC_PARAMS) $^ -o $@ $(LDFLAGS)
