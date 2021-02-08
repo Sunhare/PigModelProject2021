@@ -3,18 +3,20 @@ tis_data = load("2D_CONTROL_results.txt");
 NX = 100;
 NY = 100;
 
-video = VideoWriter('2D_CONTROL_ECTOPIC.mp4', 'MPEG-4');
+video = VideoWriter('2D_CONTROL.mp4', 'MPEG-4');
 video.FrameRate = 20;
+% video.FileFormat = 'mp4';     
 
 open(video)
 
 for i= 1:size(tis_data,1)
+% for i= 1
     tis_slice = tis_data(i,:);
     tis_slice = reshape(tis_slice, NX, NY)';
     surf(tis_slice)
     shading interp
     view(2)
-    caxis([-90 40])
+    caxis([-90 -70])
     zlim([-90 60])
     colorbar
     set(gca,'visible','off')
@@ -27,6 +29,7 @@ end
 
 close(video)
 
+<<<<<<< HEAD
 %% Quick Plot
 c_tis_data = load("2D_CONTROL_results.txt");
 r_tis_data = load("2D_REMOTE_results.txt");
@@ -45,4 +48,6 @@ ylabel("Voltage (mV)")
 xlabel("Time (ms)")
 legend("Control","Remote-HF", "Border-HF")
 set(gca, 'FontSize', 25)
+=======
+>>>>>>> parent of 1ba6ac1... Successful 2D Control Ectopic Beat
 
