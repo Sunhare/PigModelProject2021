@@ -2,7 +2,8 @@
 #include <iostream>
 #include <iomanip>
 #include <stdio.h>
-#include <math.h>
+// #include <math.h>
+#include <cmath>
 #include <time.h>
 #include <string>
 #include <chrono>
@@ -14,6 +15,8 @@
 
 #include "pig_ecc_biophysJ2021.hpp"
 #include "CVOde_Tissue.hpp"
+
+using namespace std;
 
 
 //0D Single Pig Cell Simulation
@@ -47,13 +50,14 @@ int main(){
 	//Border_HF
 	// tectopic = 740;
 
-	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+	chrono::steady_clock::time_point begin = chrono::steady_clock::now();
 
 	omp_set_num_threads(8); // OMP threads to use
+	
 	//Main Loop
 	for (double t = 0; t <= t_total; t += dt) {
 		if(tn%out_dt == 0){
-			std::cout << "t = " << tn*dt << " ms" <<  std::endl;	
+			cout << "t = " << tn*dt << " ms" <<  endl;	
 		}
 
 		#pragma omp parallel for
@@ -62,7 +66,7 @@ int main(){
 		}
 		
 		
-		ptissue.ekmodel_diffusion(t); // Solve diffusion for tissue class
+		ptissue.ekmodel_diffusion(); // Solve diffusion for tissue class
 
 		if(t >= tectopic - 2*dt && t <= tectopic + 2*dt ){
 			ptissue.ectopic_beat("TOP");
@@ -75,8 +79,8 @@ int main(){
 		tn++;
 	}
 
-	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-	std::cout << "Computation Time = " <<  (std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()) /1000000.0 << " seconds	" <<std::endl;
+	chrono::steady_clock::time_point end = chrono::steady_clock::now();
+	cout << "Computation Time = " <<  (chrono::duration_cast<chrono::microseconds>(end - begin).count()) /1000000.0 << " seconds	" <<endl;
 
 }
 

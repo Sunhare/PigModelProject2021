@@ -35,13 +35,14 @@ b_tis_data = load("2D_BORDER_results.txt");
 figure
 set(gcf, 'Color' ,'w')
 hold on
-plot(c_tis_data(:,2500), 'k', 'LineWidth', 5)
-plot(r_tis_data(:,2500), 'g', 'LineWidth', 5)
-plot(b_tis_data(:,2500) ,'r', 'LineWidth', 5)
+t_tis_data = 0:10:2000;
+plot(t_tis_data, c_tis_data(:,2500), 'k', 'LineWidth', 5)
+plot(t_tis_data, r_tis_data(:,2500), 'g', 'LineWidth', 5)
+plot(t_tis_data, b_tis_data(:,2500) ,'r', 'LineWidth', 5)
 
-title("Cell ID: 2500 Comparison")
+title("Cell (50,50) Comparison")
 ylabel("Voltage (mV)")
-xlabel("Time (100 ms)")
+xlabel("Time (ms)")
 legend("Control","Remote-HF", "Border-HF")
 set(gca, 'FontSize', 25)
 

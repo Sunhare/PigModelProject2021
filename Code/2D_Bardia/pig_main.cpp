@@ -28,7 +28,7 @@ int main(){
 	
 	double dt = 0.1; 
 	int out_dt = 10; 
-	double t_total = 10000;
+	double t_total = 2000;
 	int tn = 0; //integer t, counts all iterations
 
 	double v_new;
