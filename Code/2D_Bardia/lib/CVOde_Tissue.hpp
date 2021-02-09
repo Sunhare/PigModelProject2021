@@ -20,9 +20,9 @@ public:
 
 	double *tmp;
 
-	const double dfu=0.0001;
-	// const double dfu=0.0001;
-    const double dx=0.05;//0.15 mm
+	// const double dfu=0.0005;
+	const double dfu=0.00005;
+    const double dx=0.015;//0.15 mm
 
 	const double dt; 
 	CVOde_Cell **tissue = new CVOde_Cell* [NN];
@@ -48,8 +48,7 @@ public:
 		, dt(t_step_max)
 
 	{
-		init_tissue();
-		tmp = new double [NN];
+		
 
 		switch(PIG_CELL_TYPE){
 			case CONTROL:
@@ -62,6 +61,15 @@ public:
 				cell_name = "BORDER";
 				break;
 		}
+		std::cout << cell_name << " SIMULATION" << std::endl;
+		std::cout << "Initializing tissue..." << std::endl;
+		init_tissue(PIG_CELL_TYPE);
+		std::cout << "NX: " << NX << " NY: " << NY << std::endl;
+
+		tmp = new double [NN]; //used in Diffusion
+
+
+
 		if (output_data) {
 			fileout_name = "2D_"+cell_name+"_results.txt";
 			output_file.open("./results/2D_RESULTS/"+fileout_name);                      // output filename
@@ -74,18 +82,11 @@ public:
 	}
 
 
-	void init_tissue(void);
-	void print_tissue(int tn);
-<<<<<<< HEAD
-<<<<<<< HEAD
-	void ekmodel_diffusion(void);
-=======
-	void ekmodel_diffusion(double t);
->>>>>>> parent of 9dd1908... Quick stash
+	void init_tissue(int PIG_CELL_TYPE);
+	void print_tissue(void);
+	void ekmodel_diffusion();
+
 	void ectopic_beat(std::string ECT_BEAT_TYPE);
-=======
-	void ekmodel_diffusion(double t);
->>>>>>> parent of 1ba6ac1... Successful 2D Control Ectopic Beat
 	void create_stim_map(std::string STIM_TYPE, int NUM_STIM);
 
 };
@@ -93,20 +94,34 @@ public:
 void CVOde_TISSUE::create_stim_map(std::string STIM_TYPE, int NUM_STIM){
 
 	if(STIM_TYPE == "LEFT"){
-		for(int id=0; id<NN; id++){
-			if((id*NX+id)%NX < NUM_STIM ){
-				tissue[id]->cell.allow_stimulation_flag = true;
+		for(int idx=0; idx<NX; idx++){
+			for(int idy=0; idy<NY; idy++){
+				if(idy < NUM_STIM){
+					tissue[idx*NX +idy]->cell.allow_stimulation_flag = true;
+				}
+				else{
+					tissue[idx*NX +idy]->cell.allow_stimulation_flag = false;
+				}
 			}
-			else{
-				tissue[id]->cell.allow_stimulation_flag = false;
-			}		
 		}
 	}
 	
 }
 
+void CVOde_TISSUE::ectopic_beat(std::string ECT_BEAT_TYPE){
+	if(ECT_BEAT_TYPE == "TOP"){
 
-void CVOde_TISSUE::ekmodel_diffusion(double t){
+		for(int idx=0; idx<NX; idx++){
+			for(int idy=0; idy<NY; idy++){
+				if(idx > NX/2){
+					tissue[idx*NX+idy]->cell.V = 30;
+				}
+			}
+		}
+	}
+}
+
+void CVOde_TISSUE::ekmodel_diffusion(){
 	
     //non-flux boundary
     #pragma omp parallel for
@@ -144,14 +159,15 @@ void CVOde_TISSUE::ekmodel_diffusion(double t){
     }
 }
 
-void CVOde_TISSUE::init_tissue(){
+void CVOde_TISSUE::init_tissue(int PIG_CELL_TYPE){
+	#pragma omp parallel for
 	for (int id=0; id<NN; id++){
-		tissue[id] = new CVOde_Cell(NEQ, 0.2, fnew_pig_vm_as_para, false, CONTROL);
+		tissue[id] = new CVOde_Cell(NEQ, 0.2, fnew_pig_vm_as_para, false, PIG_CELL_TYPE);
 	}
+	
 }
 
-void CVOde_TISSUE::print_tissue(int tn){
-	// output_file << t << "\t";
+void CVOde_TISSUE::print_tissue(){
 	
 	for (int id=0; id<NN; id++){
 		output_file << tissue[id]->cell.V << "\t";
@@ -159,5 +175,6 @@ void CVOde_TISSUE::print_tissue(int tn){
 	output_file << std::endl;
 
 }
+
 
 #endif

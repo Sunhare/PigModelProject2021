@@ -16,7 +16,7 @@ for i= 1:size(tis_data,1)
     surf(tis_slice)
     shading interp
     view(2)
-    caxis([-90 -70])
+    caxis([-90 60])
     zlim([-90 60])
     colorbar
     set(gca,'visible','off')
@@ -29,7 +29,6 @@ end
 
 close(video)
 
-<<<<<<< HEAD
 %% Quick Plot
 c_tis_data = load("2D_CONTROL_results.txt");
 r_tis_data = load("2D_REMOTE_results.txt");
@@ -47,6 +46,5 @@ ylabel("Voltage (mV)")
 xlabel("Time (100 ms)")
 legend("Control","Remote-HF", "Border-HF")
 set(gca, 'FontSize', 25)
-=======
->>>>>>> parent of 1ba6ac1... Successful 2D Control Ectopic Beat
+
 
