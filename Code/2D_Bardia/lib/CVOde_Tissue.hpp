@@ -20,8 +20,8 @@ public:
 
 	double *tmp;
 
-	// const double dfu=0.0005;
-	const double dfu=0.00005;
+	const double dfu=0.0005;
+	// const double dfu=0.00005;
     const double dx=0.015;//0.15 mm
 
 	const double dt; 

@@ -21,15 +21,14 @@ int main(){
 	
 	int NEQ = 73;
 
-	int NX = 600; //X direction  
-	int NY = 600; //Y direction
+	int NX = 400; //X direction  
+	int NY = 400; //Y direction
 
 	int NN = NX*NY; //total number of cells
 	//Macros for cell type: CONTROL=1, REMOTE_HF=2, BORDER_HF=3
 
 	//Pig tissue class
-	CVOde_TISSUE ptissue(NX, NY, NEQ, 0.2, fnew_pig_vm_as_para, true, BORDER_HF);
-
+	CVOde_TISSUE ptissue(NX, NY, NEQ, 0.2, fnew_pig_vm_as_para, true, CONTROL);
 
 
 	ptissue.create_stim_map("LEFT", 5);	//(STIM_TYPE, NUM_CELLS_TO_STIM)
@@ -60,9 +59,9 @@ int main(){
 		
 		ptissue.ekmodel_diffusion(); // Solve diffusion for tissue class
 
-		// if(t >= tectopic - 2*dt && t <= tectopic + 2*dt ){
-		// 	ptissue.ectopic_beat("TOP");
-		// }
+			// if(t >= tectopic - 2*dt && t <= tectopic + 2*dt ){
+			// 	ptissue.ectopic_beat("TOP");
+			// }
 
 		if(tn%out_dt == 0){
 			ptissue.print_tissue();	// Print every out_dt iterations
