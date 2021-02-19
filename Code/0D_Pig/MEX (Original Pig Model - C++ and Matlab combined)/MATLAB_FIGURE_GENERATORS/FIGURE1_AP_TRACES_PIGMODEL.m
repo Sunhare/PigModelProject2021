@@ -115,12 +115,19 @@ for cell_type =1:3
     curr_apd = calc_apd95([t_sim v_sim]);
     curr_vmax = max(v_sim);
     curr_vmin = min(v_sim);
+    curr_range = curr_vmax - curr_vmin;
+    plateau75_mV = max(v_sim(t_sim-9.64 > (curr_apd*0.75)-0.5 & t_sim-9.64 < (curr_apd*0.75)+0.5));
+    plateau50_mV = max(v_sim(t_sim-9.64 > (curr_apd*0.50)-0.5 & t_sim-9.64 < (curr_apd*0.50)+0.5));
+    
     
  
     fprintf("%s Cell Analysis\n", cell_name)
     fprintf("APD: %.2f\n", curr_apd);
     fprintf("Vmax: %.2f\n", curr_vmax);
-    fprintf("Vmin: %.2f\n\n", curr_vmin);
+    fprintf("Vmin: %.2f\n", curr_vmin);
+    fprintf("Plateau75: %.2f\n", plateau75_mV)
+    fprintf("Plateau50: %.2f\n", plateau50_mV)
+    fprintf("\n");
     
     
     

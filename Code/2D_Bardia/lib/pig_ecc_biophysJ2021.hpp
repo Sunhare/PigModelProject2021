@@ -4,12 +4,17 @@
 #include <cmath>
 #include "stimulus.h"
 
-#include "cvode_solver.hpp"
+// #include "cvode_solver.hpp"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stimulus.cpp>
 
 #include <iomanip>
+
+// #include <boost/numeric/odeint.hpp>
+// #include <boost/numeric/odeint/integrate/XYZ.hpp> //- the integrate routines.
+
+
 
 #define CONTROL   1
 #define REMOTE_HF 2
@@ -19,14 +24,29 @@
 class PIG_ECC
 {
 public:
-	PIG_ECC(int cell_type) {
 
-		for (int i = 0; i < ODE_NUM; ++i)
+	const int PIG_CELL_TYPE;
+	const double PCL;
+	// double dt;
+	std::ofstream output_file;// output filename
+	std::ofstream YDOT_OUTPUT_FILE;
+
+	PIG_ECC(double pcl, double dt, bool output_data = false, int PIG_CELL_TYPE = CONTROL) 
+	:PCL(pcl), dt(dt), PIG_CELL_TYPE(PIG_CELL_TYPE) 
+	{
+
+		
+
+
+		//Initialize y and ydot array
+		std::string filename = "./inputs/y.txt";
+		read_initial_condition(filename.c_str());
+		for (int i = 0; i < NEQ; ++i)
 		{
 			ydot[0] = 0.0;
 		}
 
-		switch(cell_type){
+		switch(PIG_CELL_TYPE){
 			case CONTROL:
 				SCALE_ICa = 	1.17;
 				SCALE_INa = 	0.90;
@@ -90,13 +110,23 @@ public:
 				break;
 
 		}
-		std::string filename = "./inputs/y.txt";
-		read_initial_condition(filename.c_str());
+
+		if (output_data) {
+			output_file.open("./results/0D_RESULTS/"+cell_name+"_results.txt");                      // output filename
+			YDOT_OUTPUT_FILE.open("./results/0D_RESULTS/"+cell_name+"_YDOT_results.txt");                      // output filename
+		}
+		
 	};
 	~PIG_ECC() {
+		if (output_file.is_open()) {
+			output_file.close();
+			YDOT_OUTPUT_FILE.close();
+		}
 	};
 
 	double V, dV;
+	double vold;
+	double dt,dtx;
 
 	double cli =  15; //  Intracellular Cl  [mM]
 	double clo = 150; //  Extracellular Cl  [mM]
@@ -123,25 +153,25 @@ public:
 	double SCALE_Ito;
 	double SCALE_koCa;
 
-	double PCL = 1000.0;
-
-	void set_pcl(double newPCL){PCL=newPCL;}
-	double get_pcl(void){return PCL;}
-
 	bool allow_stimulation_flag = true;
 
-	static const int ODE_NUM = 73; //UPDATE To Soltis Saucerman ODE numbers
-
-	// double para[14];
-	double y[ODE_NUM];
-	double ydot[ODE_NUM];
+	static const int NEQ = 73; //Number of ODEs
+	double y[NEQ];
+	double ydot[NEQ];
 
 	// void print_to_file(double t, std::ofstream & output_file) ;
-	void print_to_file_Vm_only(double t, std::ofstream & output_file);
+	void pace(double st);
+	void pig_ecc_biophysJ2021(double st);
 
-	void pig_ecc_biophysJ2021(double t); //ODE function
+	void print_to_file_Vm_only(double t);
+	void print_everything(double t);
+	void print_YDOT(double t);
+
+	// void pig_ecc_biophysJ2021(double t); //ODE function
 	void read_initial_condition(const char * filename);
 
+	// void solve_ODEs(double t, double dt);
+	// void solve_ODEs_Vm_as_para(double t, double dt);
 
 };
 
@@ -155,18 +185,17 @@ void PIG_ECC::read_initial_condition(const char* filename) {
 		std::cerr << filename << " not opened!!! " << std::endl;
 		std::exit(0);
 	}
-	// std::cout << filename << " opened" << std::endl;
 
 	double tmp;
 	int counter = 0;
+	// std::cout << "Initial Conditions" <<std::endl;
 	while(!ic_file.eof())
 	{
 		ic_file >> tmp;
 		y[counter] = tmp;
 
-		// std::cout << "y[" << counter << "]: " << tmp << std::endl;
 
-
+		// std::cout << counter << " " << y[counter] << std::endl;
 		counter++;
 
 	}
@@ -175,18 +204,83 @@ void PIG_ECC::read_initial_condition(const char* filename) {
 
 }
 
-void PIG_ECC::print_to_file_Vm_only(double t, std::ofstream & output_file) {
+void PIG_ECC::print_to_file_Vm_only(double t) {
 
 	output_file <<  std::setprecision(7)
 	            << t << "\t"  // 1
 	            << V << "\t"  // 2
 	            << std::endl;
 }
+void PIG_ECC::print_everything(double t){
+	output_file <<  t << "\t";
+	for(int i=0; i<73;i++){
+		output_file <<std::setw(12)<<std::left << y[i] << "\t";
+	}
+	output_file << std::endl;
+}
+
+void PIG_ECC::print_YDOT(double t){
+
+	YDOT_OUTPUT_FILE <<  t << "\t";
+	for(int i=0; i<73;i++){
+		// YDOT_OUTPUT_FILE << "AHHHH" <<std::endl;
+		YDOT_OUTPUT_FILE <<std::setw(12)<<std::left << y[i] << "\t";
+	}
+	YDOT_OUTPUT_FILE << std::endl;
+}
+//ODE solver
+// void PIG_ECC::solve_ODEs(double t, double dt){
+
+// 	pig_ecc_biophysJ2021(t);
+// 	#pragma omp simd
+// 	for(int i=0; i<NEQ; i++){
+// 		y[i] += ydot[i]*dt;
+// 	}
+// }
 
 
+// void PIG_ECC::solve_ODEs_Vm_as_para(double t, double dt){
 
-// int pig_ecc_biophysJ2021(realtype t, N_Vector Y, N_Vector YDOT, void *user_data) {
-void PIG_ECC::pig_ecc_biophysJ2021(double t){
+// 	pig_ecc_biophysJ2021(t);
+// 	ydot[38] = 0;
+
+// 	for(int i=0; i<NEQ; i++){
+// 		std::cout << "y[" << i << "]: " << y[i] << std::endl;
+// 		std::cout << "ydot[" << i << "]: " << ydot[i] << std::endl;
+// 		std::cout << std::endl;
+		
+
+// 		y[i] += ydot[i]*dt;
+// 	}
+// 	V += dV * dt;
+// 	y[38] = V;
+
+// }
+
+
+void PIG_ECC::pace(double st) {
+  // -------------time step adjustment ------------------------
+  double dv = (vold - V) / dt;
+  vold = V;
+  // double itotal;
+  if (fabs(dv) > 15.0) {// then finer time step when dv/dt large
+    dtx = dt / 10;
+    for (int iii = 0; iii < 10; iii++) {
+      // itotal = pacex(st);
+    	pig_ecc_biophysJ2021(st);
+    }
+  }
+  else {
+    dtx = dt;
+    // itotal = pacex(st);
+    pig_ecc_biophysJ2021(st);
+  }
+  // return itotal;
+}
+
+
+void PIG_ECC::pig_ecc_biophysJ2021(double st){
+// void PIG_ECC::pacex(double st){
 
 	//  This is the Shannon/Bers EC coupling model Biophys J. 2004, implemented
 	//  by Jeff Saucerman with help from Eleonora Grandi and Fei Wang.
@@ -424,6 +518,12 @@ void PIG_ECC::pig_ecc_biophysJ2021(double t){
 	}
 
 	ydot[0] = am * (1 - y[0]) - bm * y[0];
+	std::cout << "YDOT[0]" << std::endl;
+	std::cout << "am: " << am << std::endl;
+	std::cout << "y[0] " << y[0] << std::endl;
+	std::cout << "bm: " << bm << std::endl;
+	std::cout << std::endl;
+
 	ydot[1] = ah * (1 - y[1]) - bh * y[1];
 	ydot[2] = aj * (1 - y[2]) - bj * y[2];
 
@@ -1065,60 +1165,34 @@ void PIG_ECC::pig_ecc_biophysJ2021(double t){
 	ydot[44] = 0;
 	ydot[45] = 0;
 
-	double I_stim = allow_stimulation_flag*S1( 0, 22, PCL, t, 3);
-
+	// double I_stim = allow_stimulation_flag*S1( 0, 22, PCL, t, 3);
+	double I_stim = allow_stimulation_flag*st;
 
 	ydot[38] = -( I_tot ) + I_stim; //Voltage from current and stimulation
 	dV = ydot[38]; //dV/dt
 	V = y[38];//Voltage
+
+	//Euler method
+	for(int i=0; i<NEQ;i++){
+		y[i] += ydot[i]*dtx; 
+	}
+	// for(int i=0;i<NEQ;i++){
+	// for(int i=38){
+	// int i = 38;
+		// std::cout <<"IN ECC LOOP: " << t << std::endl;
+		// std::cout << "y[" << i << "]: " << y[i] << std::endl;
+		// std::cout << "ydot[" << i << "]: " << ydot[i] << std::endl;
+		// std::cout << "-(I_tot): " << -(I_tot) <<std::endl;
+
+		// std::cout << "I_Na_tot: " << I_Na_tot << std::endl;
+		// std::cout << "I_Cl_tot: " << I_Cl_tot << std::endl; 
+		// std::cout << "I_Ca_tot: " << I_Ca_tot << std::endl; 
+		// std::cout << "I_K_tot: " << I_K_tot << std::endl;
+
+		// std::cout << std::endl;
+	// }
 }
 
-
-
-
-int fnew_pig(realtype t, N_Vector y, N_Vector ydot, void *user_data) {
-
-	PIG_ECC *Data = (PIG_ECC*) user_data;
-	int NEQ_m = Data->ODE_NUM;
-
-	for (int i = 0; i < NEQ_m; i++){
-		Data->y[i] = Ith(y, i + 1);
-	}
-
-	Data->V  = Data->y[38];
-	Data->pig_ecc_biophysJ2021(t);
-
-
-	for (int i = 0; i < NEQ_m; i++){
-		Ith(ydot, i + 1) = Data->ydot[i];
-	}
-
-	return 0;
-
-}
-
-
-
-int fnew_pig_vm_as_para(realtype t, N_Vector y, N_Vector ydot, void *user_data) {
-
-	PIG_ECC *Data = (PIG_ECC*) user_data;
-	int NEQ_m = Data->ODE_NUM;
-
-	for (int i = 0; i < NEQ_m; i++){
-		Data->y[i] = Ith(y, i + 1);
-	}
-
-	Data->y[38] = Data->V;// Vm updated outside solver;
-	Data->pig_ecc_biophysJ2021(t);
-	Data->ydot[38] = 0;  // Vm updated outside solver;
-
-	for (int i = 0; i < NEQ_m; i++){
-		Ith(ydot, i + 1) = Data->ydot[i];
-	}
-
-	return 0;
-
-}
 
 
 
